@@ -25,7 +25,7 @@ namespace Recallify.API.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetNote(string id)
+        public async Task<IActionResult> GetNoteById(string id)
         {
             var note = await _repository.GetNoteByIdAsync(id);
             if (note == null) return NotFound();
@@ -56,7 +56,7 @@ namespace Recallify.API.Controllers
 
             var createdNote = await _repository.CreateNoteAsync(note);
 
-            return CreatedAtAction(nameof(GetNote), new { id = createdNote.Id }, createdNote);
+            return CreatedAtAction(nameof(GetNoteById), new { id = createdNote.Id }, createdNote);
         }
     }
 }
