@@ -1,3 +1,6 @@
+using Recallify.API.Services;
+using Recallify.API.Services.Interface;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -6,6 +9,9 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddScoped<IAiService, AiService>();
+builder.Services.AddHttpClient<IAiService, AiService>();
 
 var app = builder.Build();
 
