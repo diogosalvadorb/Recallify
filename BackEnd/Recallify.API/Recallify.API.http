@@ -4,3 +4,13 @@ GET {{Recallify.API_HostAddress}}/weatherforecast/
 Accept: application/json
 
 ###
+
+### Generate Audio
+
+POST {{Recallify.API_HostAddress}}/api/ai/generate-audio
+Content-Type: application/json
+
+{
+  "text": "Bom dia Diogo.",
+  "voice": "burt"
+}
