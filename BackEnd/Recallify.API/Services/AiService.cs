@@ -151,7 +151,6 @@ namespace Recallify.API.Services
 
                 var flashcardsText = openAIResponse?.Output?.First(c => c.Type == "message").Content?.First().Text ?? "";
 
-
                 if (string.IsNullOrEmpty(flashcardsText))
                 {
                     throw new Exception("No flashcards generated from OpenAI response");

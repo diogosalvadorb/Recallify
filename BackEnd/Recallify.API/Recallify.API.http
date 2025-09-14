@@ -14,3 +14,12 @@ Content-Type: application/json
   "text": "Bom dia Diogo.",
   "voice": "burt"
 }
+
+### Generate Flashcards
+
+POST {{Recallify.API_HostAddress}}/api/ai/generate-flashcards
+Content-Type: application/json
+
+{
+  "content": "O ciclismo é a prática de se usar uma bicicleta, seja como na modalidade ou na forma de locomoção.Foi na Inglaterra, em meados do século XIX, que o ciclismo surgiu, época em que o aperfeiçoamento do veículo possibilitou o alcance de maiores velocidades. O ciclismo esportivo é regido por diversas regras, e geralmente enquadra-se em quatro categorias: provas em estradas, provas em pistas, provas de montanha (Mountain Bike ou MTB) e BMX e é praticado com diversos tipos e modelos de bicicletas"
+}

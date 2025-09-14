@@ -39,5 +39,30 @@ namespace Recallify.API.Controllers
                     statusCode: 500);
             }
         }
+
+        [HttpPost("generate-flashcards")]
+        public async Task<IActionResult> GenerateFlashcards([FromBody] GenerateFlashcardsRequest request)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(request.Content))
+                    return BadRequest("Content is required");
+
+                var flashcards = await _aiService.GenerateFlashcardsAsync(request.Content);
+
+                return Ok(new GenerateFlashcardsResponse { Flashcards = flashcards });
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Unauthorized();
+            }
+            catch (Exception ex)
+            {
+                return Problem(
+                    title: "Failed to generate flashcards",
+                    detail: ex.Message,
+                    statusCode: 500);
+            }
+        }
     }
 }
