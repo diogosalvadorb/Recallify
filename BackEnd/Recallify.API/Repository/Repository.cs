@@ -18,7 +18,7 @@ namespace Recallify.API.Repository
             _flashcards = database.GetCollection<Flashcard>(settings.FlashcardsCollectionName);
         }
 
-
+        #region Notes
         public async Task<IEnumerable<Note>> GetAllNotesAsync(string? categoryId = null)
         {
             var filter = Builders<Note>.Filter.Empty;
@@ -53,7 +53,7 @@ namespace Recallify.API.Repository
             return result.MatchedCount > 0 ? note : null;
         }
 
-        public async Task<bool> DeleteNoteAsync(string id, string userId)
+        public async Task<bool> DeleteNoteAsync(string id)
         {
             var deleteResult = await _notes.DeleteOneAsync(n => n.Id == id);
 
@@ -65,6 +65,7 @@ namespace Recallify.API.Repository
 
             return deleteResult.DeletedCount > 0;
         }
+        #endregion
 
         #region Category
         public async Task<IEnumerable<Category>> GetAllCategoriesAsync()
@@ -111,6 +112,51 @@ namespace Recallify.API.Repository
                 await _notes.UpdateManyAsync(n => n.CategoryId == id, updateDefinition);
             }
 
+            return deleteResult.DeletedCount > 0;
+        }
+        #endregion
+
+        #region FlashCards
+
+        public async Task<IEnumerable<Flashcard>> GetFlashcardsAsync()
+        {
+            return await _flashcards
+                .AsQueryable()
+                .OrderByDescending(f => f.CreatedAt)
+                .ToListAsync();
+        }
+
+        public async Task<Flashcard?> GetFlashcardByIdAsync(string id)
+        {
+            return await _flashcards
+                .Find(f => f.Id == id)
+                .FirstOrDefaultAsync();
+        }
+
+        public async Task<IEnumerable<Flashcard>> GetFlashcardsByNoteIdAsync(string noteId)
+        {
+            return await _flashcards
+                .Find(f => f.NoteId == noteId)
+                .SortByDescending(f => f.CreatedAt)
+                .ToListAsync();
+        }
+
+        public async Task<Flashcard> CreateFlashcardAsync(Flashcard flashcard)
+        {
+            await _flashcards.InsertOneAsync(flashcard);
+            return flashcard;
+        }
+
+        public async Task<Flashcard?> UpdateFlashcardAsync(Flashcard flashcard)
+        {
+            var result = await _flashcards.ReplaceOneAsync(f => f.Id == flashcard.Id,flashcard);
+
+            return result.MatchedCount > 0 ? flashcard : null;
+        }
+
+        public async Task<bool> DeleteFlashcardAsync(string id)
+        {
+            var deleteResult = await _flashcards.DeleteOneAsync(f => f.Id == id);
             return deleteResult.DeletedCount > 0;
         }
         #endregion
