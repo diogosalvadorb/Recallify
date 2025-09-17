@@ -64,5 +64,31 @@ namespace Recallify.API.Repository
             await _categories.InsertOneAsync(category);
             return category;
         }
+
+        public async Task<Category> UpdateCategoryAsync(Category category)
+        {
+            category.UpdatedAt = DateTime.UtcNow;
+            var result = await _categories.ReplaceOneAsync(c => c.Id == category.Id, category);
+
+            return result.MatchedCount > 0 ? category : throw new Exception("Failed to update category");
+        }
+
+        public async Task<bool> DeleteCategoryAsync(string id)
+        {
+            var deleteResult = await _categories.DeleteOneAsync(c => c.Id == id);
+
+
+            //Atualiza notas e flashcards para remover a referência à categoria excluída e atualiza data de modificação
+            if (deleteResult.DeletedCount > 0)
+            {
+                var updateDefinition = Builders<Note>.Update
+                    .Set(n => n.CategoryId, null as string)
+                    .Set(n => n.UpdatedAt, DateTime.UtcNow);
+
+                await _notes.UpdateManyAsync(n => n.CategoryId == id, updateDefinition);
+            }
+
+            return deleteResult.DeletedCount > 0;
+        }
     }
 }

@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Recallify.API.Models;
 using Recallify.API.Repository.Interface;
 
@@ -13,6 +12,13 @@ namespace Recallify.API.Controllers
         public CategoryController(IRepository repository)
         {
             _repository = repository;
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetCategories()
+        {
+            var categories = await _repository.GetAllCategoriesAsync();
+            return Ok(categories);
         }
 
         [HttpGet("{id}")]
@@ -35,6 +41,47 @@ namespace Recallify.API.Controllers
             var createdCategory = await _repository.CreateCategoryAsync(category);
 
             return CreatedAtAction(nameof(GetCategoryById), new { id = createdCategory.Id }, createdCategory);
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateCategory(string id, [FromBody] UpdateCategoryRequest request)
+        {
+            try
+            {
+                var existingCategory = await _repository.GetCategoryByIdAsync(id);
+                if (existingCategory == null)
+                {
+                    return NotFound();
+                }
+
+                if (!string.IsNullOrEmpty(request.Name))
+                    existingCategory.Name = request.Name;
+                if (request.Color != null)
+                    existingCategory.Color = request.Color;
+
+                var updatedCategory = await _repository.UpdateCategoryAsync(existingCategory);
+                return updatedCategory != null ? Ok(updatedCategory) : NotFound();
+            }
+            catch (Exception ex)
+            {
+                return this.StatusCode(StatusCodes.Status500InternalServerError,
+                    $"Error trying to update. Error: {ex.Message}");
+            }
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteCategory(string id)
+        {
+            try
+            {
+                var success = await _repository.DeleteCategoryAsync(id);
+                return success ? NoContent() : NotFound();
+            }
+            catch (Exception ex)
+            {
+                return this.StatusCode(StatusCodes.Status500InternalServerError,
+                    $"Erro ao tentar deletar. Error: {ex.Message}");
+            }
         }
     }
 }
