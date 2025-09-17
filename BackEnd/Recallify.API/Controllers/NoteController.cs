@@ -39,7 +39,7 @@ namespace Recallify.API.Controllers
             {
                 var category = await _repository.GetCategoryByIdAsync(request.CategoryId);
                 if (category == null)
-                    return BadRequest("Categoria não encontrada");
+                    return BadRequest("Category not found");
             }
 
             var note = new Note
@@ -57,6 +57,61 @@ namespace Recallify.API.Controllers
             var createdNote = await _repository.CreateNoteAsync(note);
 
             return CreatedAtAction(nameof(GetNoteById), new { id = createdNote.Id }, createdNote);
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateNote(string id, [FromBody] UpdateNoteRequest request)
+        {
+            try
+            {
+                var existingNote = await _repository.GetNoteByIdAsync(id);
+
+                if (existingNote == null) return NotFound();
+
+                if (!string.IsNullOrEmpty(request.CategoryId))
+                {
+                    var category = await _repository.GetCategoryByIdAsync(request.CategoryId);
+                    if (category == null)
+                    {
+                        return BadRequest("Category not found");
+                    }
+                }
+
+                if (!string.IsNullOrEmpty(request.Title))
+                    existingNote.Title = request.Title;
+                if (!string.IsNullOrEmpty(request.Content))
+                    existingNote.Content = request.Content;
+                if (request.Summary != null)
+                    existingNote.Summary = request.Summary;
+                if (request.AudioUrl != null)
+                    existingNote.AudioUrl = request.AudioUrl;
+                if (request.CategoryId != null)
+                    existingNote.CategoryId = request.CategoryId;
+
+                var updatedNote = await _repository.UpdateNoteAsync(existingNote);
+                return Ok(updatedNote);
+            }
+            catch (Exception ex)
+            {
+                return this.StatusCode(StatusCodes.Status500InternalServerError,
+                    $"Error when trying to update. Error: {ex.Message}");
+            }
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteNote(string id)
+        {
+            try
+            {
+                var success = await _repository.DeleteNoteAsync(id);
+
+                return success ? NoContent() : NotFound();
+            }
+            catch (Exception ex)
+            {
+                return this.StatusCode(StatusCodes.Status500InternalServerError,
+                    $"Error when trying to delete. Error: {ex.Message}");
+            }
         }
     }
 }
