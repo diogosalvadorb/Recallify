@@ -65,7 +65,7 @@ namespace Recallify.API.Controllers
             catch (Exception ex)
             {
                 return this.StatusCode(StatusCodes.Status500InternalServerError,
-                    $"Error trying to update. Error: {ex.Message}");
+                    $"Error when trying to update. Error: {ex.Message}");
             }
         }
 
@@ -80,7 +80,7 @@ namespace Recallify.API.Controllers
             catch (Exception ex)
             {
                 return this.StatusCode(StatusCodes.Status500InternalServerError,
-                    $"Erro ao tentar deletar. Error: {ex.Message}");
+                    $"Error when trying to delete. Error: {ex.Message}");
             }
         }
     }

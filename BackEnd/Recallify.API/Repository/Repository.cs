@@ -18,6 +18,7 @@ namespace Recallify.API.Repository
             _flashcards = database.GetCollection<Flashcard>(settings.FlashcardsCollectionName);
         }
 
+
         public async Task<IEnumerable<Note>> GetAllNotesAsync(string? categoryId = null)
         {
             var filter = Builders<Note>.Filter.Empty;
@@ -44,6 +45,28 @@ namespace Recallify.API.Repository
             return note;
         }
 
+        public async Task<Note?> UpdateNoteAsync(Note note)
+        {
+            note.UpdatedAt = DateTime.UtcNow;
+            var result = await _notes.ReplaceOneAsync(n => n.Id == note.Id, note);
+
+            return result.MatchedCount > 0 ? note : null;
+        }
+
+        public async Task<bool> DeleteNoteAsync(string id, string userId)
+        {
+            var deleteResult = await _notes.DeleteOneAsync(n => n.Id == id);
+
+            if (deleteResult.DeletedCount > 0)
+            {
+                // deleta associa flashcards vinculados à nota
+                await _flashcards.DeleteManyAsync(f => f.NoteId == id);
+            }
+
+            return deleteResult.DeletedCount > 0;
+        }
+
+        #region Category
         public async Task<IEnumerable<Category>> GetAllCategoriesAsync()
         {
             return await _categories
@@ -90,5 +113,6 @@ namespace Recallify.API.Repository
 
             return deleteResult.DeletedCount > 0;
         }
+        #endregion
     }
 }
