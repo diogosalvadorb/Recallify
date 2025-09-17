@@ -64,5 +64,30 @@ namespace Recallify.API.Controllers
                     statusCode: 500);
             }
         }
+
+        [HttpPost("generate-summary")]
+        public async Task<IActionResult> GenerateSummary([FromBody] GenerateSummaryRequest request)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(request.Content))
+                    return BadRequest("Content is required");
+
+                var summary = await _aiService.GenerateSummaryAsync(request.Content);
+
+                return Ok(new GenerateSummaryResponse { Summary = summary });
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Unauthorized();
+            }
+            catch (Exception ex)
+            {
+                return Problem(
+                    title: "Failed to generate summary",
+                    detail: ex.Message,
+                    statusCode: 500);
+            }
+        }
     }
 }
