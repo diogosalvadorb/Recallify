@@ -6,10 +6,10 @@ namespace Recallify.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class FlashCardController : ControllerBase
+    public class FlashCardsController : ControllerBase
     {
         private readonly IRepository _repository;
-        public FlashCardController(IRepository repository)
+        public FlashCardsController(IRepository repository)
         {
             _repository = repository;
         }

@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
+using NotesWise.API.Middleware;
 using Recallify.API.Data;
 using Recallify.API.Repository;
 using Recallify.API.Repository.Interface;
@@ -45,7 +46,8 @@ builder.Services.AddCors(options =>
         if (builder.Environment.IsDevelopment())
         {
             policy.WithOrigins(
-                    "http://localhost:3000"
+                    "http://localhost:3000",
+                    "http://localhost:8080" 
                   )
                   .AllowAnyMethod()
                   .AllowAnyHeader()
@@ -64,6 +66,9 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+
+app.UseCors("AllowReactApp");
+app.UseSupabaseAuth();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

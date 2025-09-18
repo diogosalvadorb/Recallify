@@ -125,7 +125,7 @@ export const NoteEditor = ({ note, categories, onSave, onClose }: NoteEditorProp
     try {
       let summaryResponse : GenerateSummaryResponse;
 
-      if (note?.id){
+      if (note?.id && note.id !== "new"){
         summaryResponse = await apiClient.generateNoteSummary(note.id);
       } else {
         summaryResponse = await apiClient.generateSummary({

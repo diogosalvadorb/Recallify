@@ -2,16 +2,17 @@
 using Recallify.API.Models;
 using Recallify.API.Repository.Interface;
 using Recallify.API.Services.Interface;
+using static Recallify.API.Models.External.AiModels;
 
 namespace Recallify.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class NoteController : ControllerBase
+    public class NotesController : ControllerBase
     {
         private readonly IRepository _repository;
         private readonly IAiService _aiService;
-        public NoteController(IRepository repository, IAiService aiService)
+        public NotesController(IRepository repository, IAiService aiService)
         {
             _repository = repository;
             _aiService = aiService;
@@ -113,5 +114,88 @@ namespace Recallify.API.Controllers
                     $"Error when trying to delete. Error: {ex.Message}");
             }
         }
+
+        [HttpPost("{id}/generate-summary")]
+        public async Task<IActionResult> GenerateNoteSummary(string id)
+        {
+            try
+            {
+                var note = await _repository.GetNoteByIdAsync(id);
+                if (note == null) return NotFound();
+
+                var summary = await _aiService.GenerateSummaryAsync(note.Content);
+
+                note.Summary = summary;
+                await _repository.UpdateNoteAsync(note);
+
+                return Ok(new GenerateSummaryResponse { Summary = summary });
+            }
+            catch (Exception ex)
+            {
+                return Problem(
+                    title: "Failed to generate summary",
+                    detail: ex.Message,
+                    statusCode: 500);
+            }
+        }
+
+        [HttpPost("{id}/generate-audio")]
+        public async Task<IActionResult> GenerateNoteAudio(string id, [FromBody] GenerateAudioRequest request)
+        {
+            try
+            {
+                var note = await _repository.GetNoteByIdAsync(id);
+                if (note == null) return NotFound();
+
+                var textToSpeak = !string.IsNullOrEmpty(note.Summary) ? note.Summary : note.Content;
+                var audioContent = await _aiService.GenerateAudioAsync(textToSpeak, request.Voice);
+
+                return Ok(new GenerateAudioResponse { AudioContent = audioContent });
+            }
+            catch (Exception ex)
+            {
+                return Problem(
+                    title: "Failed to generate audio",
+                    detail: ex.Message,
+                    statusCode: 500);
+            }
+        }
+
+        [HttpPost("{id}/flashcards/generate")]
+        public async Task<IActionResult> GenerateNoteFlashcards(string id)
+        {
+            try
+            {
+                var note = await _repository.GetNoteByIdAsync(id);
+                if (note == null) return NotFound();
+
+                var flashcardData = await _aiService.GenerateFlashcardsAsync(note.Content);
+
+                var flashcards = new List<Flashcard>();
+
+                foreach (var data in flashcardData)
+                {
+                    var flashcard = new Flashcard
+                    {
+                        NoteId = id,
+                        Question = data.Question,
+                        Answer = data.Answer
+                    };
+
+                    var createdFlashcard = await _repository.CreateFlashcardAsync(flashcard);
+                    flashcards.Add(createdFlashcard);
+                }
+
+                return Ok(flashcards);
+            }
+            catch (Exception ex)
+            {
+                return Problem(
+                    title: "Failed to generate flashcards",
+                    detail: ex.Message,
+                    statusCode: 500);
+            }
+        }
+
     }
 }

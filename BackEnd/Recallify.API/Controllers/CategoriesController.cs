@@ -6,10 +6,10 @@ namespace Recallify.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class CategoryController : ControllerBase
+    public class CategoriesController : ControllerBase
     {
         private readonly IRepository _repository;
-        public CategoryController(IRepository repository)
+        public CategoriesController(IRepository repository)
         {
             _repository = repository;
         }

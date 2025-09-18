@@ -1,6 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 
-const API_BASE_URL = "http://localhost:7223/api";
+const API_BASE_URL = "https://localhost:7223/api";
 
 export interface Category {
   id: string;
